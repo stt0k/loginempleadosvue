@@ -55,7 +55,107 @@ export class ServiceEmpleados {
   }
 }
 
+export class ServiceFutbol {
+  // JUGADORES
+  async getJugadores() {
+    const request = "api/jugadores";
+    const url = Global.URL_FUTBOL + request;
+    const response = await axios.get(url);
+    return response.data;
+  }
+
+  async getJugadorById(id) {
+    const request = `api/jugadores/${id}`;
+    const url = Global.URL_FUTBOL + request;
+    const response = await axios.get(url);
+    return response.data;
+  }
+
+  async getJugadoresPorEquipo(idEquipo) {
+    const jugadores = await this.getJugadores();
+    return jugadores.filter(
+      (jugador) => jugador.idEquipo === parseInt(idEquipo)
+    );
+  }
+
+  async buscarJugadores(nombreJugador) {
+    const request = `api/jugadores/buscarjugadores/${nombreJugador}`;
+    const url = Global.URL_FUTBOL + request;
+    const response = await axios.get(url);
+    return response.data;
+  }
+
+  async createJugador(jugador) {
+    const request = "api/jugadores";
+    const url = Global.URL_FUTBOL + request;
+    const response = await axios.post(url, jugador);
+    return response.data;
+  }
+
+  async updateJugador(idJugador, idEquipo) {
+    const request = `api/jugadores/${idJugador}/${idEquipo}`;
+    const url = Global.URL_FUTBOL + request;
+    const response = await axios.put(url);
+    return response.data;
+  }
+
+  async deleteJugador(id) {
+    const request = `api/jugadores/${id}`;
+    const url = Global.URL_FUTBOL + request;
+    const response = await axios.delete(url);
+    return response.data;
+  }
+
+  // EQUIPOS
+  async getEquipos() {
+    const request = "api/equipos";
+    const url = Global.URL_FUTBOL + request;
+    const response = await axios.get(url);
+    return response.data;
+  }
+
+  async getEquipoById(id) {
+    const request = `api/equipos/${id}`;
+    const url = Global.URL_FUTBOL + request;
+    const response = await axios.get(url);
+    return response.data;
+  }
+
+  async createEquipo(equipo) {
+    const request = "api/equipos";
+    const url = Global.URL_FUTBOL + request;
+    const response = await axios.post(url, equipo);
+    return response.data;
+  }
+}
+
+export class ServiceApuestas {
+  // APUESTAS
+  async getApuestas() {
+    const request = "api/apuestas";
+    const url = Global.URL_FUTBOL + request;
+    const response = await axios.get(url);
+    return response.data;
+  }
+
+  async createApuesta(apuesta) {
+    const request = "api/apuestas";
+    const url = Global.URL_FUTBOL + request;
+    const response = await axios.post(url, apuesta);
+    return response.data;
+  }
+
+  async deleteApuesta(id) {
+    const request = `api/apuestas/${id}`;
+    const url = Global.URL_FUTBOL + request;
+    const response = await axios.delete(url);
+    return response.data;
+  }
+}
+
 // Exportar una instancia del servicio
 export const serviceEmpleados = new ServiceEmpleados();
+export const serviceFutbol = new ServiceFutbol();
+export const serviceApuestas = new ServiceApuestas();
 
 export default serviceEmpleados;
