@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { serviceFutbol } from "../services/Services.js";
 
@@ -15,6 +15,17 @@ onMounted(() => {
   cargarDetallesEquipo();
   cargarJugadoresEquipo();
 });
+
+// Vuelve a cargar el detalles y jugadoresequipo al cambiar la id de la ruta
+watch(
+  () => route.params.id,
+  (newId, oldId) => {
+    if (newId !== oldId) {
+      cargarDetallesEquipo();
+      cargarJugadoresEquipo();
+    }
+  }
+);
 
 const cargarDetallesEquipo = async () => {
   const id = route.params.id;
