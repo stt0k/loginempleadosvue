@@ -1,3 +1,31 @@
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { serviceFutbol } from "../services/Services.js";
+
+// Composables
+const route = useRoute();
+
+// Estado
+const jugador = ref(null);
+
+// Cargar detalles del jugador al montar el componente
+onMounted(() => {
+  cargarDetallesJugador();
+});
+
+const cargarDetallesJugador = async () => {
+  const id = route.params.id;
+  const data = await serviceFutbol.getJugadorById(id);
+  jugador.value = data;
+};
+
+// Manejar errores de imagen
+const handleImageError = (event) => {
+  event.target.src = "https://via.placeholder.com/128x128/4a5568/ffffff?text=?";
+};
+</script>
+
 <template>
   <div class="min-h-screen bg-zinc-900 p-6">
     <div class="max-w-4xl mx-auto">
@@ -147,31 +175,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
-import { serviceFutbol } from "../services/Services.js";
-
-// Composables
-const route = useRoute();
-
-// Estado
-const jugador = ref(null);
-
-// Cargar detalles del jugador al montar el componente
-onMounted(() => {
-  cargarDetallesJugador();
-});
-
-const cargarDetallesJugador = async () => {
-  const id = route.params.id;
-  const data = await serviceFutbol.getJugadorById(id);
-  jugador.value = data;
-};
-
-// Manejar errores de imagen
-const handleImageError = (event) => {
-  event.target.src = "https://via.placeholder.com/128x128/4a5568/ffffff?text=?";
-};
-</script>

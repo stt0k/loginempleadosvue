@@ -1,5 +1,46 @@
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { serviceFutbol } from "../services/Services.js";
+
+// Composables
+const route = useRoute();
+
+// Estado
+const equipo = ref(null);
+const jugadores = ref([]);
+
+// Cargar detalles del equipo al montar el componente
+onMounted(() => {
+  cargarDetallesEquipo();
+  cargarJugadoresEquipo();
+});
+
+const cargarDetallesEquipo = async () => {
+  const id = route.params.id;
+  const data = await serviceFutbol.getEquipoById(id);
+  equipo.value = data;
+};
+
+const cargarJugadoresEquipo = async () => {
+  const id = route.params.id;
+  const data = await serviceFutbol.getJugadoresPorEquipo(id);
+  jugadores.value = data;
+};
+
+// Manejar errores de imagen
+const handleImageError = (event) => {
+  event.target.src =
+    "https://via.placeholder.com/128x128/4a5568/ffffff?text=⚽";
+};
+
+const handlePlayerImageError = (event) => {
+  event.target.src = "https://via.placeholder.com/48x48/4a5568/ffffff?text=?";
+};
+</script>
+
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-zinc-900 to-zinc-800 p-6">
+  <div class="min-h-screen bg-zinc-900 p-6">
     <div class="max-w-6xl mx-auto">
       <!-- Botón de regreso -->
       <div class="mb-6">
@@ -30,7 +71,7 @@
         <div class="bg-zinc-800/50 rounded-lg shadow-xl overflow-hidden">
           <div class="bg-zinc-700/50 px-8 py-6">
             <div class="flex flex-col lg:flex-row items-center gap-6">
-              <div class="flex-shrink-0">
+              <div class="shrink-0">
                 <img
                   :src="equipo.imagen"
                   :alt="equipo.nombre"
@@ -272,44 +313,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
-import { serviceFutbol } from "../services/Services.js";
-
-// Composables
-const route = useRoute();
-
-// Estado
-const equipo = ref(null);
-const jugadores = ref([]);
-
-// Cargar detalles del equipo al montar el componente
-onMounted(() => {
-  cargarDetallesEquipo();
-  cargarJugadoresEquipo();
-});
-
-const cargarDetallesEquipo = async () => {
-  const id = route.params.id;
-  const data = await serviceFutbol.getEquipoById(id);
-  equipo.value = data;
-};
-
-const cargarJugadoresEquipo = async () => {
-  const id = route.params.id;
-  const data = await serviceFutbol.getJugadoresPorEquipo(id);
-  jugadores.value = data;
-};
-
-// Manejar errores de imagen
-const handleImageError = (event) => {
-  event.target.src =
-    "https://via.placeholder.com/128x128/4a5568/ffffff?text=⚽";
-};
-
-const handlePlayerImageError = (event) => {
-  event.target.src = "https://via.placeholder.com/48x48/4a5568/ffffff?text=?";
-};
-</script>

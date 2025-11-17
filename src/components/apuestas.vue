@@ -1,5 +1,30 @@
+<script setup>
+import { ref, onMounted } from "vue";
+import { serviceApuestas } from "../services/Services.js";
+import { serviceEmpleados } from "../services/Services.js";
+import { useRouter } from "vue-router";
+
+// Estado del componente
+const apuestas = ref([]);
+
+const router = useRouter();
+
+// Cargar apuestas al montar el componente
+onMounted(async () => {
+  if (!serviceEmpleados.isAuthenticated()) {
+    router.push("/login");
+    return;
+  }
+  await cargarApuestas();
+});
+
+const cargarApuestas = async () => {
+  const data = await serviceApuestas.getApuestas();
+  apuestas.value = data;
+};
+</script>
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-zinc-900 to-zinc-800 p-6">
+  <div class="min-h-screen bg-zinc-900 p-6">
     <div class="max-w-6xl mx-auto">
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-white mb-4">🎰 Mis Apuestas</h1>
@@ -129,21 +154,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref, onMounted } from "vue";
-import { serviceApuestas } from "../services/Services.js";
-
-// Estado del componente
-const apuestas = ref([]);
-
-// Cargar apuestas al montar el componente
-onMounted(() => {
-  cargarApuestas();
-});
-
-const cargarApuestas = async () => {
-  const data = await serviceApuestas.getApuestas();
-  apuestas.value = data;
-};
-</script>

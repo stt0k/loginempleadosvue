@@ -1,3 +1,26 @@
+<script setup>
+import { ref, onMounted } from "vue";
+import { serviceFutbol } from "../services/Services.js";
+
+// Estado
+const jugadores = ref([]);
+
+// Cargar jugadores al montar el componente
+onMounted(() => {
+  cargarJugadores();
+});
+
+const cargarJugadores = async () => {
+  const data = await serviceFutbol.getJugadores();
+  jugadores.value = data;
+};
+
+// Manejar errores de imagen
+const handleImageError = (event) => {
+  event.target.src = "https://via.placeholder.com/48x48/4a5568/ffffff?text=?";
+};
+</script>
+
 <template>
   <div class="min-h-screen bg-zinc-900 p-6">
     <div class="max-w-7xl mx-auto">
@@ -108,26 +131,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref, onMounted } from "vue";
-import { serviceFutbol } from "../services/Services.js";
-
-// Estado
-const jugadores = ref([]);
-
-// Cargar jugadores al montar el componente
-onMounted(() => {
-  cargarJugadores();
-});
-
-const cargarJugadores = async () => {
-  const data = await serviceFutbol.getJugadores();
-  jugadores.value = data;
-};
-
-// Manejar errores de imagen
-const handleImageError = (event) => {
-  event.target.src = "https://via.placeholder.com/48x48/4a5568/ffffff?text=?";
-};
-</script>
