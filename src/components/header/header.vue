@@ -5,66 +5,78 @@ import { serviceEmpleados, serviceFutbol } from "../../services/Services.js";
 
 const router = useRouter();
 
-// Estado del header
-const isMenuOpen = ref(false);
+// ESTADO DEL HEADER -
+const isMobileMenuOpen = ref(false);
 const isAuthenticated = ref(false);
-const isEquiposDropdownOpen = ref(false);
+const isPrimaryDropdownOpen = ref(false);
 const isUserDropdownOpen = ref(false);
 const equipos = ref([]);
 
 onMounted(() => {
   checkAuthentication();
-  cargarEquipos();
+  loadPrimaryData();
   // Escuchar cambios en las rutas
   router.afterEach(() => {
     checkAuthentication();
   });
 });
 
+// MÉTODOS DE AUTENTICACIÓN -
 const checkAuthentication = () => {
   isAuthenticated.value = serviceEmpleados.isAuthenticated();
 };
 
-const cargarEquipos = async () => {
+// MÉTODOS DE DATOS -
+const loadPrimaryData = async () => {
   const data = await serviceFutbol.getEquipos();
   equipos.value = data;
 };
 
-const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value;
-  // Cerrar dropdowns si están abiertos
-  isEquiposDropdownOpen.value = false;
+// MÉTODOS DROPDOWN - GENÉRICOS PARA COPIAR
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value;
+  isPrimaryDropdownOpen.value = false;
   isUserDropdownOpen.value = false;
 };
 
-const toggleEquiposDropdown = () => {
-  isEquiposDropdownOpen.value = !isEquiposDropdownOpen.value;
+const togglePrimaryDropdown = () => {
+  isPrimaryDropdownOpen.value = !isPrimaryDropdownOpen.value;
   isUserDropdownOpen.value = false;
 };
 
-const toggleUserDropdown = () => {
+const toggleSecondaryDropdown = () => {
   isUserDropdownOpen.value = !isUserDropdownOpen.value;
-  isEquiposDropdownOpen.value = false;
+  isPrimaryDropdownOpen.value = false;
 };
 
-const closeMenu = () => {
-  isMenuOpen.value = false;
-  isEquiposDropdownOpen.value = false;
+const closeMobileMenu = () => {
+  isMobileMenuOpen.value = false;
+  isPrimaryDropdownOpen.value = false;
   isUserDropdownOpen.value = false;
 };
 
-const closeEquiposDropdown = () => {
-  isEquiposDropdownOpen.value = false;
+const closePrimaryDropdown = () => {
+  isPrimaryDropdownOpen.value = false;
 };
 
-const closeUserDropdown = () => {
+const closeSecondaryDropdown = () => {
   isUserDropdownOpen.value = false;
+};
+
+const closeAllDropdowns = () => {
+  isPrimaryDropdownOpen.value = false;
+  isUserDropdownOpen.value = false;
+};
+
+// MÉTODOS ADICIONALES
+const handleImageError = (event) => {
+  event.target.style.display = "none";
 };
 
 const logout = () => {
   serviceEmpleados.logout();
   checkAuthentication();
-  closeMenu();
+  closeMobileMenu();
   router.push("/");
 };
 </script>
@@ -72,11 +84,8 @@ const logout = () => {
 <template>
   <!-- Overlay para cerrar dropdowns -->
   <div
-    v-if="isEquiposDropdownOpen || isUserDropdownOpen"
-    @click="
-      closeEquiposDropdown();
-      closeUserDropdown();
-    "
+    v-if="isPrimaryDropdownOpen || isUserDropdownOpen"
+    @click="closeAllDropdowns"
     class="fixed inset-0 z-40"
   ></div>
 
@@ -113,14 +122,14 @@ const logout = () => {
           <!-- Dropdown de Equipos -->
           <div class="relative">
             <button
-              @click="toggleEquiposDropdown"
+              @click="togglePrimaryDropdown"
               class="text-white hover:text-blue-400 px-3 py-2 rounded transition flex items-center gap-1"
-              :class="{ 'text-blue-400': isEquiposDropdownOpen }"
+              :class="{ 'text-blue-400': isPrimaryDropdownOpen }"
             >
               Equipos
               <svg
                 class="w-4 h-4 transition-transform"
-                :class="{ 'rotate-180': isEquiposDropdownOpen }"
+                :class="{ 'rotate-180': isPrimaryDropdownOpen }"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -134,37 +143,40 @@ const logout = () => {
               </svg>
             </button>
 
-            <!-- Dropdown Menu -->
+            <!-- Dropdown Menu Equipos -->
             <div
-              v-if="isEquiposDropdownOpen"
-              class="absolute top-full left-0 mt-2 w-64 bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl z-50"
+              v-if="isPrimaryDropdownOpen"
+              class="absolute top-full left-0 mt-2 w-64 bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto"
             >
-              <div class="py-2 max-h-64 overflow-y-auto">
+              <div class="py-2">
                 <router-link
                   v-for="equipo in equipos"
                   :key="equipo.idEquipo"
                   :to="`/equipos/${equipo.idEquipo}`"
-                  @click="closeEquiposDropdown"
+                  @click="closePrimaryDropdown"
                   class="flex items-center gap-3 px-4 py-3 text-white hover:bg-zinc-700 transition-colors"
                 >
                   <img
                     v-if="equipo.imagen"
                     :src="equipo.imagen"
                     :alt="equipo.nombre"
-                    class="w-8 h-8 rounded object-cover"
-                    @error="(e) => (e.target.style.display = 'none')"
+                    class="w-8 h-8 rounded object-cover shrink-0"
+                    @error="handleImageError"
                   />
+                  <div
+                    v-else
+                    class="w-8 h-8 bg-zinc-600 rounded flex items-center justify-center shrink-0"
+                  >
+                    ⚽
+                  </div>
                   <div class="flex-1 min-w-0">
                     <div class="font-medium truncate">{{ equipo.nombre }}</div>
-                    <div v-if="equipo.champions" class="text-xs text-zinc-400">
-                      🏆 {{ equipo.champions }} Champions
-                    </div>
                   </div>
                 </router-link>
 
                 <div
                   v-if="equipos.length === 0"
-                  class="px-4 py-3 text-zinc-400 text-center"
+                  class="px-4 py-3 text-zinc-400"
                 >
                   No hay equipos disponibles
                 </div>
@@ -184,7 +196,7 @@ const logout = () => {
             <!-- Dropdown de Usuario -->
             <div class="relative">
               <button
-                @click="toggleUserDropdown"
+                @click="toggleSecondaryDropdown"
                 class="text-white hover:text-blue-400 px-3 py-2 rounded transition flex items-center gap-1"
                 :class="{ 'text-blue-400': isUserDropdownOpen }"
               >
@@ -213,7 +225,7 @@ const logout = () => {
                 <div class="py-2">
                   <router-link
                     to="/perfil"
-                    @click="closeUserDropdown"
+                    @click="closeSecondaryDropdown"
                     class="flex items-center gap-3 px-4 py-3 text-white hover:bg-zinc-700 transition-colors"
                   >
                     <svg
@@ -234,7 +246,7 @@ const logout = () => {
 
                   <router-link
                     to="/mis-apuestas"
-                    @click="closeUserDropdown"
+                    @click="closeSecondaryDropdown"
                     class="flex items-center gap-3 px-4 py-3 text-white hover:bg-zinc-700 transition-colors"
                   >
                     <svg
@@ -255,7 +267,7 @@ const logout = () => {
 
                   <router-link
                     to="/crear-apuesta"
-                    @click="closeUserDropdown"
+                    @click="closeSecondaryDropdown"
                     class="flex items-center gap-3 px-4 py-3 text-white hover:bg-zinc-700 transition-colors"
                   >
                     <svg
@@ -313,8 +325,8 @@ const logout = () => {
 
         <button
           class="md:hidden text-white focus:outline-none"
-          @click="toggleMenu"
-          :class="{ 'text-blue-400': isMenuOpen }"
+          @click="toggleMobileMenu"
+          :class="{ 'text-blue-400': isMobileMenuOpen }"
         >
           <svg
             class="w-6 h-6"
@@ -323,7 +335,7 @@ const logout = () => {
             viewBox="0 0 24 24"
           >
             <path
-              v-if="!isMenuOpen"
+              v-if="!isMobileMenuOpen"
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
@@ -340,14 +352,14 @@ const logout = () => {
         </button>
       </div>
 
-      <div v-if="isMenuOpen" class="md:hidden pb-4">
+      <div v-if="isMobileMenuOpen" class="md:hidden pb-4">
         <div class="flex flex-col space-y-2">
           <router-link
             to="/"
             class="text-white hover:text-blue-400 px-3 py-2 rounded transition"
             active-class="text-blue-400"
             exact
-            @click="closeMenu"
+            @click="closeMobileMenu"
           >
             Inicio
           </router-link>
@@ -356,7 +368,7 @@ const logout = () => {
             to="/jugadores"
             class="text-white hover:text-blue-400 px-3 py-2 rounded transition"
             active-class="text-blue-400"
-            @click="closeMenu"
+            @click="closeMobileMenu"
           >
             Jugadores
           </router-link>
@@ -364,14 +376,14 @@ const logout = () => {
           <!-- Equipos en menú móvil -->
           <div>
             <button
-              @click="toggleEquiposDropdown"
+              @click="togglePrimaryDropdown"
               class="text-white hover:text-blue-400 px-3 py-2 rounded transition flex items-center gap-1 w-full text-left"
-              :class="{ 'text-blue-400': isEquiposDropdownOpen }"
+              :class="{ 'text-blue-400': isPrimaryDropdownOpen }"
             >
               Equipos
               <svg
                 class="w-4 h-4 transition-transform"
-                :class="{ 'rotate-180': isEquiposDropdownOpen }"
+                :class="{ 'rotate-180': isPrimaryDropdownOpen }"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -385,12 +397,12 @@ const logout = () => {
               </svg>
             </button>
 
-            <div v-if="isEquiposDropdownOpen" class="pl-6 space-y-1 mt-2">
+            <div v-if="isPrimaryDropdownOpen" class="pl-6 space-y-1 mt-2">
               <router-link
                 v-for="equipo in equipos"
                 :key="equipo.idEquipo"
                 :to="`/equipos/${equipo.idEquipo}`"
-                @click="closeMenu"
+                @click="closeMobileMenu"
                 class="flex items-center gap-3 px-3 py-2 text-zinc-300 hover:text-white hover:bg-zinc-700 rounded transition-colors"
               >
                 <img
@@ -398,7 +410,7 @@ const logout = () => {
                   :src="equipo.imagen"
                   :alt="equipo.nombre"
                   class="w-6 h-6 rounded object-cover"
-                  @error="(e) => (e.target.style.display = 'none')"
+                  @error="handleImageError"
                 />
                 <div class="flex-1 min-w-0">
                   <div class="font-medium truncate text-sm">
@@ -414,7 +426,7 @@ const logout = () => {
               to="/perfil"
               class="text-white hover:text-blue-400 px-3 py-2 rounded transition"
               active-class="text-blue-400"
-              @click="closeMenu"
+              @click="closeMobileMenu"
             >
               Mi Perfil
             </router-link>
@@ -423,9 +435,27 @@ const logout = () => {
               to="/subordinados"
               class="text-white hover:text-blue-400 px-3 py-2 rounded transition"
               active-class="text-blue-400"
-              @click="closeMenu"
+              @click="closeMobileMenu"
             >
               Subordinados
+            </router-link>
+
+            <router-link
+              to="/mis-apuestas"
+              class="text-white hover:text-blue-400 px-3 py-2 rounded transition"
+              active-class="text-blue-400"
+              @click="closeMobileMenu"
+            >
+              Mis Apuestas
+            </router-link>
+
+            <router-link
+              to="/crear-apuesta"
+              class="text-white hover:text-blue-400 px-3 py-2 rounded transition"
+              active-class="text-blue-400"
+              @click="closeMobileMenu"
+            >
+              Crear Apuesta
             </router-link>
 
             <button
@@ -441,7 +471,7 @@ const logout = () => {
               to="/login"
               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition inline-block text-center"
               active-class="bg-blue-700"
-              @click="closeMenu"
+              @click="closeMobileMenu"
             >
               Iniciar Sesión
             </router-link>
